@@ -15,7 +15,7 @@ l4_h = 0.5
 l5_h = 0.0005
 l_death_h = 1.
 
-t_f_even = 30000 # time for equalibrium 
+t_f_even = 300000 # time for equalibrium 
 model_f = BacteriaTransformationModel(l1_f, l2_f, l3_f, l4_f, l_death_f, l5_f, \
  state = [0, 10000, 0], state_name = ["normal", "VBNC", "dead"])
 simulator_f = Simulator(model = model_f)

@@ -199,10 +199,12 @@ class SIRModel:
 			for rate_method in rate_methods:
 				t.append(methodcaller(rate_method)(self))
 			t_min = min(t)
+
 			if t_min == float('inf'):
 				break
 
 			l = round(t_min / delta_t)
+
 			for i in range(num_state):
 				data[i] += [data[i][-1] for _ in range(l)]
 
@@ -239,7 +241,7 @@ class BacteriaTransformationModel(SIRModel):
 
 	def getTime_4(self):
 		s = (self.__lambda[3] - self.population_stress * self.state[0]) * self.state[0]
-		return random.expovariate(s) if s else float('inf')
+		return random.expovariate(s) if s > 0 else float('inf')
 
 	def event_4(self):
 		self.state[0] += 1
@@ -252,6 +254,14 @@ class BacteriaTransformationModel(SIRModel):
 		if self.state[0] > 0:
 			self.state[0] -= 1
 			self.state[2] += 1
+
+	def getTime_6(self):
+		s = -(self.__lambda[3] - self.population_stress * self.state[0]) * self.state[0]
+		return random.expovariate(s) if s > 0 else float('inf')
+
+	def event_6(self):
+		if self.state[0] > 0:
+			self.state[0] -= 1
 
 if __name__ == '__main__':
 
