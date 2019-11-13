@@ -192,7 +192,7 @@ class SIRModel:
 		rate_methods, event_methods = self.__valid_method()
 
 		while True:
-			if len(data) > n:
+			if len(data[0]) > n:
 				break
 
 			t = []
