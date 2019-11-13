@@ -158,13 +158,17 @@ class SIRModel:
 		# if u only want the result. use this method
 
 		rate_methods, event_methods = self.__valid_method()
+		total_t = 0
 
-		for _ in range(n):
+		while True:
+			if total_t > n:
+				break
 
 			t = []
 			for rate_method in rate_methods:
 				t.append(methodcaller(rate_method)(self))
 			t_min = min(t)
+			total_t += t_min
 
 			if t_min == float('inf'):
 				break
@@ -187,7 +191,9 @@ class SIRModel:
 
 		rate_methods, event_methods = self.__valid_method()
 
-		for _ in range(n):
+		while True:
+			if len(data) > n:
+				break
 
 			t = []
 			for rate_method in rate_methods:
@@ -211,9 +217,10 @@ class SIRModel:
 
 class BacteriaTransformationModel(SIRModel):
 
-	def __init__(self, l1, l2, l3, l4, state = None, state_name = None):
+	def __init__(self, l1, l2, l3, l4, l_death=0.1,l5=0.0005, state = None, state_name = None):
 		super().__init__(l1, l2, state, state_name)
-		self.__lambda = [l1, l2, l3, l4]
+		self.population_stress = l5
+		self.__lambda = [l1, l2, l3, l4, l_death]
 
 	def getTime_3(self):
 
@@ -231,11 +238,20 @@ class BacteriaTransformationModel(SIRModel):
 			self.state[0] += 1
 
 	def getTime_4(self):
-		s = self.__lambda[3] * self.state[0]
+		s = (self.__lambda[3] - self.population_stress * self.state[0]) * self.state[0]
 		return random.expovariate(s) if s else float('inf')
 
 	def event_4(self):
 		self.state[0] += 1
+
+	def getTime_5(self):
+		s = self.__lambda[4] * self.state[0]
+		return random.expovariate(s) if s else float('inf')
+
+	def event_5(self):
+		if self.state[0] > 0:
+			self.state[0] -= 1
+			self.state[2] += 1
 
 if __name__ == '__main__':
 
