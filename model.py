@@ -28,6 +28,15 @@ class Simulator:
 		plt.savefig(path)
 		plt.clf()
 
+	def __validSimulationInput(self, num_state, show, graph, path, n):
+
+		if not isinstance(show, list) or len(show) != num_state or len([elt for elt in show if elt not in range(2)]) > 0:
+			raise Exception("invalid show!", show)
+		if graph and not path:
+			raise Exception("empty path!", path)
+		if n <= 0:
+			raise Exception("invalid n!", n)
+
 	def simulation(self, n, graph = False, show = [1, 1, 1], path = None, title = "SIR model graph"):
 		
 		# This function is for call the model's simulation method and plot.
@@ -39,17 +48,84 @@ class Simulator:
 		state = self.__model.state
 		num_state = len(state)
 		
-		if not isinstance(show, list) or len(show) != num_state or len([elt for elt in show if elt not in range(2)]) > 0:
-			raise Exception("invalid show!", show)
-		if graph and not path:
-			raise Exception("empty path!", path)
-		if n <= 0:
-			raise Exception("invalid n!", n)
+		self.__validSimulationInput(num_state, show, graph, path, n)
 
 		if not graph:
 			self.__model.simulation_with_no_process(n)	
 		else:
 			self.__data = self.__model.simulation(n)
+			self.__plot(show, path, title)
+
+class Simulator_2_model:
+
+	def __init__(self, model1, model2, time1, time2, iteration):
+
+		self.__model1 = model1
+		self.__model2 = model2
+		self.__time1 = time1
+		self.__time2 = time2
+		self.__iteration = iteration
+		self.__data = None
+
+		if len(self.__model1.state) != len(self.__model2.state):
+			raise Exception("unmatched model state number!", len(self.__model1.state), len(self.__model2.state))
+		if self.__model1.getStateName() != self.__model2.getStateName():
+			raise Exception("unmatched label!", self.__model1.getStateName(), self.__model2.getStateName())
+		if time1 < 0:
+			raise Exception("wrong time length!", time1)
+		if time2 < 0:
+			raise Exception("wrong time length!", time2)
+
+	def __plot(self, show, path, title):
+
+		# This function is for ploting.
+
+		plt.title(title)
+		l = len(self.__data[0])
+		for i in range(len(show)):
+			if show[i]:
+				plt.plot(range(l), self.__data[i], label = self.__model1.getStateName()[i])
+		plt.ylabel("population")
+		plt.xlabel(r"time/$10^{-4}$")
+		plt.legend()
+		plt.savefig(path)
+		plt.clf()
+
+	def __validSimulationInput(self, num_state, show, graph, path):
+
+		if not isinstance(show, list) or len(show) != num_state or len([elt for elt in show if elt not in range(2)]) > 0:
+			raise Exception("invalid show!", show)
+		if graph and not path:
+			raise Exception("empty path!", path)	
+
+	def simulation(self, graph = False, show = [1, 1, 1], path = None, title = "SIR model graph"):
+
+		state = self.__model1.state
+		num_state = len(state)
+
+		self.__validSimulationInput(num_state, show, graph, path)
+
+		if not graph:
+			for _ in range(self.__iteration):
+				self.__model1.setStateAsList(state)
+				self.__model1.simulation_with_no_process(self.__time1)
+				state = self.__model1.state
+				self.__model2.setStateAsList(state)
+				self.__model2.simulation_with_no_process(self.__time2)
+				state = self.__model2.state
+		else:
+			self.__data = [[] for _ in range(num_state)]
+			for _ in range(self.__iteration):
+				self.__model1.setStateAsList(state)
+				newData = self.__model1.simulation(self.__time1)
+				for i in range(num_state):
+					self.__data[i] += newData[i]
+				state = self.__model1.state
+				self.__model2.setStateAsList(state)
+				newData = self.__model2.simulation(self.__time2)
+				for i in range(num_state):
+					self.__data[i] += newData[i]
+				state = self.__model2.state
 			self.__plot(show, path, title)
 
 class SIRModel:
@@ -121,11 +197,11 @@ class SIRModel:
 		# the rate method must start with "getTime_"
 
 		s = self.__lambda[0] * self.state[0]
-		return random.expovariate(s) if s else float('inf')
+		return random.expovariate(s) if s > 0 else float('inf')
 
 	def getTime_2(self):
 		s = self.__lambda[1] * self.state[1]
-		return random.expovariate(s) if s else float('inf')
+		return random.expovariate(s) if s > 0 else float('inf')
 
 	def __valid_method(self):
 
@@ -219,7 +295,7 @@ class SIRModel:
 
 class BacteriaTransformationModel(SIRModel):
 
-	def __init__(self, l1, l2, l3, l4, l_death=0.1,l5=0.0005, state = None, state_name = None):
+	def __init__(self, l1, l2, l3, l4, l_death=0.1, l5=0.0005, state = None, state_name = None):
 		super().__init__(l1, l2, state, state_name)
 		self.population_stress = l5
 		self.__lambda = [l1, l2, l3, l4, l_death]
@@ -229,7 +305,7 @@ class BacteriaTransformationModel(SIRModel):
 		# new model can inherit SIRModel and create new rate method like that
 
 		s = self.__lambda[2] * self.state[1]
-		return random.expovariate(s) if s else float('inf')
+		return random.expovariate(s) if s > 0 else float('inf')
 
 	def event_3(self):
 
@@ -248,7 +324,7 @@ class BacteriaTransformationModel(SIRModel):
 
 	def getTime_5(self):
 		s = self.__lambda[4] * self.state[0]
-		return random.expovariate(s) if s else float('inf')
+		return random.expovariate(s) if s > 0 else float('inf')
 
 	def event_5(self):
 		if self.state[0] > 0:
