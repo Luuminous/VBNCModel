@@ -1,3 +1,6 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
 from model import SIRModel,Simulator,BacteriaTransformationModel, Simulator_2_model
 init_state = state = [10000, 200, 0]
 # friendly state
@@ -54,5 +57,46 @@ model_f = BacteriaTransformationModel(l1_f, l2_f, l3_f, l4_f, l_death_f, l5_f, \
 model_h = BacteriaTransformationModel(l1_h, l2_h, l3_h, l4_h, l_death_h, l5_h, \
 	state = cur_s, state_name = ["normal", "VBNC", "dead"])
 
-simulator = Simulator_2_model(model1 = model_f, model2 = model_h, time1 = 10000, time2 = 30000, iteration = 40)
-simulator.simulation(graph = True, path = "f-h-iter-v2.png", title = "friendly-harsh-iteration-v2")
+# simulator = Simulator_2_model(model1 = model_f, model2 = model_h, time1 = 10000, time2 = 30000, iteration = 40)
+# simulator.simulation(graph = True, path = "f-h-iter-v2.png", title = "friendly-harsh-iteration-v2")
+simulator = Simulator(model = model_f)
+simulator.simulation(n = 30000, graph = True, path = "pic.png")
+print(model_f.state)
+
+x = []
+new_l3_f = l3_f
+for i in range(10):
+	new_l3_f = new_l3_f * 0.9
+	x.append(new_l3_f)
+new_l3_f = l3_f
+for i in range(10):
+	new_l3_f = new_l3_f * 1.1
+	x.append(new_l3_f)
+
+
+print(x)
+print(len(x))
+
+y = []
+for changingRate in range(len(x)):
+	model_changing = BacteriaTransformationModel(l1_f, l2_f, changingRate, l4_f, l_death_f, l5_f, \
+	state = cur_s, state_name = ["normal", "VBNC", "dead"])
+	simulator = Simulator(model_changing)
+	simulator.simulation(n = 30000, graph = True, path = "pic.png")
+	print(model_changing.state)
+	numC = model_changing.state[0] + model_changing.state[1]
+	y.append(numC)
+
+print(y)
+
+plt.plot(x, y)
+plt.xlabel("lambda 3")
+plt.ylabel("number of V and C")
+plt.title("lambda 3 with noise")
+plt.savefig("l3.png")
+
+
+
+
+
+
