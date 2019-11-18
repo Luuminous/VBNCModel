@@ -59,6 +59,7 @@ model_h = BacteriaTransformationModel(l1_h, l2_h, l3_h, l4_h, l_death_h, l5_h, \
 
 # simulator = Simulator_2_model(model1 = model_f, model2 = model_h, time1 = 10000, time2 = 30000, iteration = 40)
 # simulator.simulation(graph = True, path = "f-h-iter-v2.png", title = "friendly-harsh-iteration-v2")
+<<<<<<< HEAD
 simulator = Simulator(model = model_f)
 simulator.simulation(n = 30000, graph = True, path = "pic.png")
 print(model_f.state)
@@ -100,3 +101,8 @@ plt.savefig("l3.png")
 
 
 
+=======
+simulator = Simlulator(model = model_f)
+simulator.simulation(n = 30000, graph = False)
+print(model_f.state)
+>>>>>>> 688cc8bde2e46d7439222a8f8ccf1d6a7ff8b477
