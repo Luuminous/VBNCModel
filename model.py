@@ -58,14 +58,15 @@ class Simulator:
 
 class Simulator_2_model:
 
-	def __init__(self, model1, model2, time1, time2, iteration):
+	def __init__(self, model1, model2, time1, time2, percent = 0.001, iteration = 100):
 
 		self.__model1 = model1
 		self.__model2 = model2
 		self.__time1 = time1
 		self.__time2 = time2
-		self.__iteration = iteration
 		self.__data = None
+		self.__percent = percent
+		self.__iteration = iteration
 
 		if len(self.__model1.state) != len(self.__model2.state):
 			raise Exception("unmatched model state number!", len(self.__model1.state), len(self.__model2.state))
@@ -75,6 +76,10 @@ class Simulator_2_model:
 			raise Exception("wrong time length!", time1)
 		if time2 < 0:
 			raise Exception("wrong time length!", time2)
+		if percent < 0 or percent > 1:
+			raise Exception("wrong percent!", percent)
+		if iteration < 0:
+			raise Exception("wrong iteration!", iteration)
 
 	def __plot(self, show, path, title):
 
@@ -127,6 +132,76 @@ class Simulator_2_model:
 					self.__data[i] += newData[i]
 				state = self.__model2.state
 			self.__plot(show, path, title)
+
+	def set_time(self, time):
+		if isinstance(time, np.ndarray):
+			time = list(time)
+		if not isinstance(time, list) or len(time) != 2 or len([elt for elt in time if elt < 0]) > 0:
+			raise Exception("invalid input!", time)
+		self.__time1 = time[0]
+		self.__time2 = time[1]
+
+	def set_iteration(self, iteration):
+		if not isinstance(iteration, int) or iteration <= 0:
+			raise Exception("invalid input!", iteration)
+		self.__iteration = iteration
+
+	def get_result_threshold(self):
+
+		state = self.__model1.state
+		num_state = len(state)
+		previous = 0
+		total_t = 0
+		threshold = self.__percent * (state[0] + state[1])
+
+		while True:
+			self.__model1.setStateAsList(state)
+			self.__model1.simulation_with_no_process(self.__time1)
+			state = self.__model1.state
+			total_t += self.__time1
+			
+			self.__model2.setStateAsList(state)
+			self.__model2.simulation_with_no_process(self.__time2)
+			state = self.__model2.state
+			total_t += self.__time2
+
+			now = state[0] + state[1]
+
+			if previous == 0:
+				previous = now
+			else:
+				if abs(previous - now) < threshold:
+					break
+				else:
+					previous = now
+
+		self.__model1.restartState()
+		self.__model2.restartState()
+		return now, total_t
+
+	def get_result_99percent(self):
+		state = self.__model1.state
+		num_state = len(state)
+		total_t = 0
+		threshold = 0.01 * (state[0] + state[1])
+
+		while True:
+			self.__model1.setStateAsList(state)
+			self.__model1.simulation_with_no_process(self.__time1)
+			state = self.__model1.state
+			total_t += self.__time1
+			
+			self.__model2.setStateAsList(state)
+			self.__model2.simulation_with_no_process(self.__time2)
+			state = self.__model2.state
+			total_t += self.__time2
+
+			if state[0] + state[1] < threshold:
+				break
+
+		self.__model1.restartState()
+		self.__model2.restartState()
+		return state[0] + state[1], total_t
 
 class SIRModel:
 
@@ -233,10 +308,13 @@ class SIRModel:
 		# This function is to simulate with no process
 		# if u only want the result. use this method
 
+		delta_t = 1e-4
+		n *= delta_t
 		rate_methods, event_methods = self.__valid_method()
 		total_t = 0
 
 		while True:
+
 			if total_t > n:
 				break
 

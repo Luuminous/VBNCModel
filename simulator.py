@@ -54,5 +54,21 @@ model_f = BacteriaTransformationModel(l1_f, l2_f, l3_f, l4_f, l_death_f, l5_f, \
 model_h = BacteriaTransformationModel(l1_h, l2_h, l3_h, l4_h, l_death_h, l5_h, \
 	state = cur_s, state_name = ["normal", "VBNC", "dead"])
 
-simulator = Simulator_2_model(model1 = model_f, model2 = model_h, time1 = 10000, time2 = 30000, iteration = 40)
-simulator.simulation(graph = True, path = "f-h-iter-v2.png", title = "friendly-harsh-iteration-v2")
+simulator = Simulator_2_model(model1 = model_f, model2 = model_h, time1 = 10000, time2 = 30000, iteration = 100)
+print("stop when reach 1%")
+print(simulator.get_result_99percent())
+simulator.set_time([15000, 30000])
+print(simulator.get_result_99percent())
+simulator.set_time([5000, 30000])
+print(simulator.get_result_99percent())
+
+print("stop when the difference in each turn less than 0.1%")
+simulator.set_time([10000, 30000])
+print(simulator.get_result_threshold())
+simulator.set_time([15000, 30000])
+print(simulator.get_result_threshold())
+simulator.set_time([5000, 30000])
+print(simulator.get_result_threshold())
+
+# simulator = Simulator(model = model_f)
+# simulator.simulation(n = 50000, graph = True, path = "0.55.png", title = "test")
