@@ -33,19 +33,24 @@ simulator = Simulator_2_model(model1 = model_f, model2 = model_h, time1 = 10000,
 N_trail = 50
 
 #schema
-S1 = [15000, 30000]
-S2 = [5000, 30000]
+S1 = [7594, 15905]
+S2 = [7920, 21557]
+S3 = [8000, 15000]
 
 t_lst_1 = []
 t_lst_2 = []
+t_lst_3 = []
 start_time = time.time()
 for i in range(N_trail):
 	simulator.set_time(S1)
 	_,t1 = simulator.get_result_99percent()
 	simulator.set_time(S2)
 	_,t2 = simulator.get_result_99percent()
+	simulator.set_time(S3)
+	_,t3 = simulator.get_result_99percent()
 	t_lst_1.append(t1)
 	t_lst_2.append(t2)
+	t_lst_3.append(t3)
 elapsed_time = time.time() - start_time
 print("finished simulation for {0} trails".format(N_trail))
 print("total time: ",elapsed_time)
@@ -53,9 +58,9 @@ print("total time: ",elapsed_time)
 # draw box plot
 plt.title("randomness analysis: total trail="+str(N_trail))
 plt.ylabel("pseudo time")
-plt.boxplot([t_lst_1,t_lst_2])
-plt.xticks([1, 2], ["schema: "+str(S1), "schema: "+str(S2)])
-plt.show()
+plt.boxplot([t_lst_1,t_lst_2,t_lst_3])
+plt.xticks([1, 2, 3], ["schema: "+str(S1), "schema: "+str(S2), "schema: "+str(S3)])
+plt.savefig("ana_random_alter.png")
 
 
 
