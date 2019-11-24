@@ -33,9 +33,9 @@ simulator = Simulator_2_model(model1 = model_f, model2 = model_h, time1 = 10000,
 N_trail = 50
 
 #schema
-S1 = [7594, 15905]
-S2 = [7920, 21557]
-S3 = [8000, 15000]
+S1 = [109, 336]
+S2 = [7000, 15000]
+S3 = [9000, 26000]
 
 t_lst_1 = []
 t_lst_2 = []
