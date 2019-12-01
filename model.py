@@ -209,11 +209,11 @@ class Simulator_2_model:
 		self.__model2.restartState()
 		return now, total_t
 
-	def get_result_99percent(self):
+	def get_result_with_percent(self, percent):
 		state = self.__model1.state
 		num_state = len(state)
 		total_t = 0
-		threshold = 0.01 * (state[0] + state[1])
+		threshold = percent * (state[0] + state[1])
 
 		while True:
 			self.__model1.setStateAsList(state)
@@ -232,6 +232,12 @@ class Simulator_2_model:
 		self.__model1.restartState()
 		self.__model2.restartState()
 		return state[0] + state[1], total_t
+
+	def get_result_99percent(self):
+		return self.get_result_with_percent(0.01)
+
+	def get_result_50percent(self):
+		return self.get_result_with_percent(0.5)
 
 class SIRModel:
 
