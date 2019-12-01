@@ -33,9 +33,9 @@ simulator = Simulator_2_model(model1 = model_f, model2 = model_h, time1 = 10000,
 N_trail = 50
 
 #schema
-S1 = [109, 336]
-S2 = [7000, 15000]
-S3 = [9000, 26000]
+S1 = [10000, 30000]
+S2 = [9000, 26000]
+S3 = [109, 336]
 
 t_lst_1 = []
 t_lst_2 = []
@@ -58,8 +58,9 @@ print("total time: ",elapsed_time)
 # draw box plot
 plt.title("randomness analysis: total trail="+str(N_trail))
 plt.ylabel("pseudo time")
+plt.xlabel("schema")
 plt.boxplot([t_lst_1,t_lst_2,t_lst_3])
-plt.xticks([1, 2, 3], ["schema: "+str(S1), "schema: "+str(S2), "schema: "+str(S3)])
+plt.xticks([1, 2, 3], [str(S1), str(S2), str(S3)])
 plt.savefig("ana_random_alter.png")
 
 

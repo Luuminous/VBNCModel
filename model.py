@@ -22,8 +22,8 @@ class Simulator:
 		for i in range(len(show)):
 			if show[i]:
 				plt.plot(range(l), self.__data[i], label = self.__model.getStateName()[i])
-		plt.ylabel("population")
-		plt.xlabel(r"time/$10^{-4}$")
+		plt.ylabel("bacteria amount")
+		plt.xlabel("pseudo time")
 		plt.legend()
 		plt.savefig(path)
 		plt.clf()
@@ -132,6 +132,36 @@ class Simulator_2_model:
 					self.__data[i] += newData[i]
 				state = self.__model2.state
 			self.__plot(show, path, title)
+
+	def simulation_raw_data_99_percent(self):
+		state = self.__model1.state
+		num_state = len(state)
+		threshold = 0.01 * (state[0] + state[1])
+		data = []
+
+		while True:
+			self.__model1.setStateAsList(state)
+			newData = self.__model1.simulation(self.__time1)
+			state = self.__model1.state
+			temp = [elt for elt in newData[0]]
+			for i in range(len(newData[0])):
+				temp[i] += newData[1][i]
+			data += temp
+			
+			self.__model2.setStateAsList(state)
+			newData = self.__model2.simulation(self.__time2)
+			state = self.__model2.state
+			temp = [elt for elt in newData[0]]
+			for i in range(len(newData[0])):
+				temp[i] += newData[1][i]
+			data += temp
+
+			if state[0] + state[1] < threshold:
+				break
+
+		self.__model1.restartState()
+		self.__model2.restartState()
+		return data
 
 	def set_time(self, time):
 		if isinstance(time, np.ndarray):
