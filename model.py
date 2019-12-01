@@ -56,6 +56,28 @@ class Simulator:
 			self.__data = self.__model.simulation(n)
 			self.__plot(show, path, title)
 
+	def get_result_with_percent(self, percent):
+		state = self.__model.state
+		num_state = len(state)
+		total_t = 0
+		threshold = percent * (state[0] + state[1])
+
+		while True:
+			self.__model.simulation_with_no_process(1000)
+			total_t += 1000
+
+			if state[0] + state[1] < threshold:
+				break
+
+		self.__model.restartState()
+		return state[0] + state[1], total_t
+
+	def get_result_99percent(self):
+		return self.get_result_with_percent(0.01)
+
+	def get_result_50percent(self):
+		return self.get_result_with_percent(0.5)
+
 class Simulator_2_model:
 
 	def __init__(self, model1, model2, time1, time2, percent = 0.001, iteration = 100):

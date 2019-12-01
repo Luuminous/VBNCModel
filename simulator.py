@@ -28,10 +28,13 @@ model_f = BacteriaTransformationModel(l1_f, l2_f, l3_f, l4_f, l_death_f, l5_f, \
 model_h = BacteriaTransformationModel(l1_h, l2_h, l3_h, l4_h, l_death_h, l5_h, \
 	state = cur_s, state_name = ["normal", "VBNC", "dead"])
 
-simulator = Simulator(model = model_h)
-simulator.simulation(n = 50000, graph = True, show = [1, 1, 0], path = "only_harsh.png", title = "bacteria amount change with harsh environment")
+# simulator = Simulator(model = model_h)
+# # simulator.simulation(n = 50000, graph = True, show = [1, 1, 0], path = "only_harsh.png", title = "bacteria amount change with harsh environment")
 
-# simulator = Simulator_2_model(model1 = model_f, model2 = model_h, time1 = 109, time2 = 336)
+# print(simulator.get_result_50percent())
+
+simulator = Simulator_2_model(model1 = model_f, model2 = model_h, time1 = 109, time2 = 336)
+print(simulator.get_result_50percent())
 # data1 = simulator.simulation_raw_data_99_percent()
 # print("stop when reach 1%")
 # print(simulator.get_result_99percent())
