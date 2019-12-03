@@ -31,7 +31,7 @@ model_h = BacteriaTransformationModel(l1_h, l2_h, l3_h, l4_h, l_death_h, l5_h, \
 	state = cur_s, state_name = ["normal", "VBNC", "dead"])
 
 # get the expected time for eliminate over 99%
-def get_expected_time(schema,simulator,n_trail=5):
+def get_expected_time(schema,simulator,n_trail=1):
 	t = []
 	for i in range(n_trail):
 		simulator.set_time(schema)
@@ -62,32 +62,56 @@ def test_get_expected_time():
 # TODO: add an parameter: maximum time, over this time, return directly this maximum value
 
 # doing MCMC here
-def MCMC_opt(max_trail = 5000):
+def MCMC_opt(max_trail = 10000,T=10):
 	def get_a_neighbor(S,nrange=0.1): # get +-0.1 of the input n, return an int
 		s1,s2 = S
-		b1 = int(s1*nrange)
-		b2 = int(s2*nrange)
+		b1 = min(200,int(s1*nrange))
+		b2 = min(200,int(s2*nrange))
 		return [s1+random.randint(-b1,b1),s2+random.randint(-b2,b2)]
 
+	start_time = time.time()
 	cur_S = [5000, 30000]
 	ret_S_lst = []
 	simulator = Simulator_2_model(model1 = model_f, model2 = model_h, time1 = 10000,\
 	time2 = 30000, iteration = 100)
 	cur_exp_time = get_expected_time(cur_S,simulator)
+	t0 = cur_exp_time
 
 	for i in range(max_trail):
-		print("iter={0}, S={1}, exptime={2}".format(i,cur_S,cur_exp_time))
 		ret_S_lst.append(cur_S)
 		next_S = get_a_neighbor(cur_S)
 		next_exp_time = get_expected_time(cur_S,simulator)
+		if next_exp_time>2*cur_exp_time:
+			continue
+		# print("@@@")
+		print("iter={0}, S={1}, exptime={2}".format(i,cur_S,cur_exp_time))
+		# print("state: {0} for {1}".format(next_exp_time,cur_exp_time))
 		r = random.random()
-		r1 = float(next_exp_time)/float(cur_exp_time)
-		if r<r1:
+		r1 = float(cur_exp_time)/float(next_exp_time)
+		if r<pow(r1,T):
 			cur_S = next_S
 			cur_exp_time = next_exp_time
+		# else:
+		# 	print("give up: {0} for {1}".format(next_exp_time,cur_exp_time))
+	print("using time: ", time.time()-start_time)
 	return ret_S_lst
 
-MCMC_opt()
+# MCMC_opt()
+
+def visu_result(fp="mcmc_result_limited_exptime.txt"):
+	ret = []
+	with open(fp,"r") as f:
+		for line in f:
+			if len(line.split("["))==1:
+				continue
+			a,b = line.split("[")[1].split("]")[0].split(", ")
+			ret.append([int(a),int(b)])
+		return ret
+
+r = visu_result()
+plt.clf()
+plt.scatter([it[0] for it in r],[it[1] for it in r],alpha=0.1)
+plt.show()
 
 
 
